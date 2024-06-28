@@ -9,7 +9,9 @@ const orderschema = new Schema({
     item_quantity : { type : Number},
     order_date: {type : Date},
     order_status : {type : Boolean},
-    bill_id: {type : mongoose.Schema.Types.ObjectId, ref:'bill'}
+    bill_id: {type : mongoose.Schema.Types.ObjectId, ref:'bill'},
+    restaurant_id : { type: mongoose.Schema.Types.ObjectId, ref:'restaurant'},
+    restaurant_name : { type : String}
 },{collection : 'order'});
 
 const Order = mongoose.model('order',orderschmema);
