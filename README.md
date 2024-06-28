@@ -28,5 +28,5 @@ This project is the backend for the Retail Management System (RMS), built using 
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/rms-backend.git
+   git clone https://github.com/ChaoticEdu/rms-backend.git
    cd rms-backend
