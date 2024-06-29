@@ -28,7 +28,7 @@ router.post('/upload',async(req , res)=>{
             restaurant_name: req.body.res_name
         })
     const savedtable = await newtable.save();
-    res.status(201).json(savetable);
+    res.status(201).json(savedtable);
     }catch(err){
         res.status(500).json({message:err.message});
     }
