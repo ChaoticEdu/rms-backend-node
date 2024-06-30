@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const billschema = new Schema({
-    item_list : {type : String},
+    item_list : {type : [String]},
     total : {type : Number},
     tips : {type : Number},
     discount : { type: Number},

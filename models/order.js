@@ -5,6 +5,7 @@ const orderschema = new Schema({
 
     menu_id : { type : mongoose.Schema.Types.ObjectId, ref:'restaurant' },
     user_id : { type : mongoose.Schema.Types.ObjectId, ref:'user'},
+    table_name:{tyep: String},
     item_name : {type : String},
     item_quantity : { type : Number},
     order_date: {type : Date},
