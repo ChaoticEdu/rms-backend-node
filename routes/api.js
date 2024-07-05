@@ -12,5 +12,6 @@ router.use('/menu',menuroute);
 router.use('/user',userroute);
 router.use('/table',tableroute);
 router.use('/order',orderroute);
+router.use('/bill',billroute);
 
 module.exports = router;
