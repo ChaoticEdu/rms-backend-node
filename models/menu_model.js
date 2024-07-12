@@ -7,7 +7,7 @@ const menuschema = new Schema({
     item_category:{type: String},
     item_pic:{type: String},
     item_description:{type: String},
-    restaurant_id :{type: mongoose.Schema.Types.ObjectId, ref:'restaurant'},
+    // restaurant_id :{type: mongoose.Schema.Types.ObjectId, ref:'restaurant'},
     restaurant_name: {type : String},
 },{ collection: 'menu' });
 

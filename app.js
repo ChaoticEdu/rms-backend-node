@@ -7,12 +7,23 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var apiroutes = require('./routes/api');
+var cors = require('cors'); 
 
 var app = express();
 
 const bodyParser = require('body-parser');
 
 app.use(bodyParser.json());
+
+// Configure CORS to allow requests from your Angular app
+const corsOptions = {
+  origin: 'http://localhost:4200', // Allow requests from this origin
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true, // Allow cookies to be sent with the requests
+  optionsSuccessStatus: 204 // Some legacy browsers (IE11, various SmartTVs) choke on 204
+};
+
+app.use(cors(corsOptions));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

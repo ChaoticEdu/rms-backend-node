@@ -1,4 +1,4 @@
-var express =requier('express');
+var express =require('express');
 var router = express.Router();
 var db = require('../../db_con/conn');
 var Bill = require('../../models/bill');
@@ -39,4 +39,4 @@ router.post('/upload', async(req, res)=>{
     }
 });
 
-modules.exports = routes;
+module.exports = router;
