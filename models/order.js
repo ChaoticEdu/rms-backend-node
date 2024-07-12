@@ -15,6 +15,6 @@ const orderschema = new Schema({
     restaurant_name : { type : String}
 },{collection : 'order'});
 
-const Order = mongoose.model('order',orderschmema);
+const Order = mongoose.model('order',orderschema);
 
-mongoose.exports = Order;
+module.exports = Order;
