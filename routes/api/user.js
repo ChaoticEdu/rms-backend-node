@@ -77,9 +77,11 @@ router.post('/login', async (req, res)=> {
         }
         if(process.env.JWT_SECRET){
             const payload = {userId: founduser._id};
+            const role = founduser.user_role;
+            const user_id = founduser._id;
             const secret = process.env.JWT_SECRET;
             const token = jwt.sign(payload, secret, {expiresIn: '24h'});
-            res.status(201).json({message: 'logged in', token});
+            res.status(201).json({message: 'logged in', token,role , user_id});
         }else{
             res.status(201).json({message: ' logged in without jwt token'});
         }
