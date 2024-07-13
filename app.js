@@ -16,7 +16,7 @@ dotenv.config();
 const bodyParser = require('body-parser');
 
 app.use(bodyParser.json());
-
+//FUck you
 // Configure CORS to allow requests from your Angular app
 const corsOptions = {
   origin: 'http://localhost:4200', // Allow requests from this origin
