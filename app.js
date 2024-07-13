@@ -7,9 +7,11 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var apiroutes = require('./routes/api');
-var cors = require('cors'); 
+var cors = require('cors');
+var dotenv = require('dotenv');
 
 var app = express();
+dotenv.config();
 
 const bodyParser = require('body-parser');
 

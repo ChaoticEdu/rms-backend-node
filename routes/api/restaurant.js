@@ -2,8 +2,9 @@ var express = require('express');
 var router = express.Router();
 var db = require('../../db_con/conn');
 var Restaurant = require('../../models/restaurant_model');
+var verifytoken = require('../../auth/token');
 
-router.get('/', async (req, res) => {
+router.get('/', verifytoken,async (req, res) => {
     try {
       const variable_name = req.query.var_name;
       const value = req.query.value;
