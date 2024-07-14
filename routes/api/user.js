@@ -29,6 +29,7 @@ router.post('/registration', async(req, res) => {
     try{
         const newuser = new User({
             user_name: req.body.name,
+            email: req.body.email,
             user_password: req.body.password,
             user_phone_no: req.body.phone_no,
             user_pic: req.body.pic,
@@ -77,13 +78,17 @@ router.post('/login', async (req, res)=> {
         }
         if(process.env.JWT_SECRET){
             const payload = {userId: founduser._id};
-            const role = founduser.user_role;
-            const user_id = founduser._id;
-            const restaurant_id = founduser.restaurant_id;
-            const restaurant_name = founduser.restaurant_name;
+
+            const data = {
+                role : founduser.user_role,
+                user_id : founduser._id,
+                restaurant_id : founduser.restaurant_id,
+                restaurant_name : founduser.restaurant_name
+            }
+
             const secret = process.env.JWT_SECRET;
             const token = jwt.sign(payload, secret, {expiresIn: '24h'});
-            res.status(201).json({message: 'logged in', token,role , user_id, restaurant_id, restaurant_name});
+            res.status(201).json({message: 'logged in', token,data});
         }else{
             res.status(201).json({message: ' logged in without jwt token'});
         }
