@@ -39,7 +39,7 @@ router.post('/registration', async(req, res) => {
             restaurant_id: req.body.restaurant_id,
             restaurant_name: req.body.restaurant_name
         });
-        const existing_pan = await User.findOne({$or : [{pan_no: newuser.pan_no},{email: newuser.email}]});
+        const existing = await User.findOne({$or : [{pan_no: newuser.pan_no},{email: newuser.email}]});
         if(existing){
             return res.status(400).json({message: ' registration failed as user is not unique or pan number isnt'});
         }

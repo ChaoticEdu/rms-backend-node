@@ -22,8 +22,6 @@ router.get('/', async (req, res) => {
         }else{
           search_query[key]={ $regex: new RegExp(value, 'i') };
         }
-      
-
       }
       
       console.log('Query:', search_query); //debug console
