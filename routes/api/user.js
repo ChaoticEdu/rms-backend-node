@@ -39,13 +39,21 @@ router.post('/registration', async(req, res) => {
             restaurant_id: req.body.restaurant_id,
             restaurant_name: req.body.restaurant_name
         });
-        const existing = await User.findOne({pan_no: newuser.pan_no});
+        const existing_pan = await User.findOne({$or : [{pan_no: newuser.pan_no},{email: newuser.email}]});
         if(existing){
             return res.status(400).json({message: ' registration failed as user is not unique or pan number isnt'});
         }
         const saveduser = await newuser.save();
         if(process.env.JWT_SECRET){
             const payload = {userID : saveduser._id};
+
+            const data = {
+                role : User.role,
+                restaurant_id : User.restaurant_id,
+                restuarant_name : User.restaurant_name,
+
+            }
+
             const secrete = process.env.JWT_SECRET;
             const token = jwt.sign(payload,secrete, {expiresIn: '24h'})
             res.status(201).json({message: 'Registration sucessful',token});
@@ -63,10 +71,10 @@ router.post('/login', async (req, res)=> {
     try{
 
         const logged = { 
-            username: req.body.username,
+            email: req.body.email,
             password: req.body.password
         };
-        const  founduser = await User.findOne({user_name: logged.username});
+        const  founduser = await User.findOne({email: logged.email});
         if(!founduser){
             return res.status(401).json({message: 'user not found'});
         }
