@@ -3,24 +3,23 @@ var router = express.Router();
 var db = require('../../db_con/conn');
 var Category = require('../../models/category');
 
-router.get('/',async(req, res)=>{
+router.get('/:restaurant_id/:category_id?',async(req, res)=>{
     try{
-        const search_query=[{
-            restaurant_id: req.body.restaurant_id
-        }];
+        const restaurantId= req.params.restaurant_id;
+        const categoryId = req.params.category_id;
+        let search_query={ restaurant_id : restaurantId };
 
-        for(const key in req.body){
-            if(key !== 'restaurant_id' && req.body.hasOwnProperty(key)){
-
-                const value = typeof req.body[key] === 'string' ? {$regex : new RegExp(req.body[key],'key')}:req.body[key];
-                search_query.push({[key]:value});
+        if(req.params.category_id){
+            search_query.category_id = categoryId;
             }
-        const category = await Category.find({$and:search_query});
+        console.log(search_query);
 
-        res.json(category);
-        }
+        let categorys = await Category.find(search_query);
 
-    }catch(err){
+        console.log(categorys);
+        
+        res.json(categorys);
+        }catch(err){
         res.status(500).json({message: err.message});
     }
 

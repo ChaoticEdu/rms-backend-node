@@ -4,22 +4,16 @@ var db = require('../../db_con/conn');
 var Restaurant = require('../../models/restaurant_model');
 var verifytoken = require('../../auth/token');
 
-router.get('/', verifytoken,async (req, res) => {
+router.get('/:restaurant_id', verifytoken,async (req, res) => {
     try {
+      const resturantId = req.params.resytaurant_id;
       const search_query=[{
-        resytaurant_id: req.body.resytaurant_id
+        resytaurant_id: restaurantId
       }];
 
-      for(const key in req.body){
 
-        if(key !== 'restuarant_id' && req.body.hasOwnProperty(key)){
-          const value = typeof req.body[key] === 'string' ? {$regex: new RegExp(req.body[key], 'i')}: req.body[key];
-          search_query.push({[key]:value});
-        }
 
-      }
-
-      const restaurants = await Restaurant.find(search_query);
+      let restaurants = await Restaurant.find(search_query);
 
       console.log('Results:', restaurants);//debug console
 

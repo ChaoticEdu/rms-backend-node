@@ -15,10 +15,11 @@ router.get('/:restaurant_id/:name?',async(req, res)=>{
         const restaurantId = req.params.restaurant_id;
         let query = { restaurant_id: restaurantId };
 
-        if (req.query.name) {
-            query.user_name = req.query.name;
+        if (req.params.name) {
+            query.user_name = req.params.name;
         }
         console.log(query);
+        
         let users = await User.find(query);
 
         res.json(users);

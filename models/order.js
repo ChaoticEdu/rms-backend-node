@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const orderschema = new Schema({
-
     menu_id : { type : mongoose.Schema.Types.ObjectId, ref:'restaurant' },
     user_id : { type : mongoose.Schema.Types.ObjectId, ref:'user'},
     table_name:{tyep: String},

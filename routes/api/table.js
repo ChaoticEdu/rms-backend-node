@@ -3,20 +3,20 @@ const router = express.Router();
 var db = require('../../db_con/conn');
 var Table = require('../../models/table');
 
-router.get('/', async(req , res)=>{
+router.get('/:restaurant_id/:table_name?', async(req , res)=>{
     try{
-    const search_query = [{
-        restaurant_id: req.body.restaurant_id
-    }];
+    const restaurantId = req.params.restaurant_id;
+    const tablename = req.params.table_name;
+    const search_query = {
+        restaurant_id: restaurantId
+    };
 
-    for(const key in req.body){
-        if(key!== 'restaurant_id' && req.body.hasOwnProperty(key)){
-            const value = typeof req.body[key] === 'sting' ? {$regex :new RegExp(req.body[key], 'i')}: req.body[key];
-            search_query.push({[key]:value});
-        }
+    if(req.params.table_name){
+        search_query.table_name = tablename;
     }
 
-    const tables = await Table.find({$and:search_query});
+    let tables = await Table.find(search_query);
+
     res.json(tables);
     }catch(err){
         res.status(500).json({ message: err.message });
@@ -26,10 +26,10 @@ router.get('/', async(req , res)=>{
 router.post('/upload',async(req , res)=>{
     try{
         const newtable = new Table({
-            table_name: req.body.name,
-            table_status: req.body.status,
-            restaurant_id: req.body.res_id,
-            restaurant_name: req.body.res_name
+            table_name: req.body.table_name,
+            table_status: req.body.table_status,
+            restaurant_id: req.body.restaurant_id,
+            restaurant_name: req.body.restaurant_name
         })
     const savedtable = await newtable.save();
     res.status(201).json(savedtable);

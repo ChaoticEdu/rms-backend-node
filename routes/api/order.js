@@ -4,18 +4,13 @@ var db = require('../../db_con/conn');
 var Order = require('../../models/order');
 
 // Route to get orders based on a query parameter
-router.get('/', async (req, res) => {
+router.get('/:restaurant_id/:', async (req, res) => {
     try {
+        const restaurantId = req.params.restaurant_id;
         const search_query=[{
             restaurant_id: req.body.restaurant_id
         }];
 
-        for(const key in req.body){
-            if(key !== 'restaurant_id' && req.body.hasOwnProperty(key)){
-                const value = typeof req.body[key] === 'string' ? {$regex : new RegExp(req.body[key], 'key')}: req.body[key];
-                search_query.push({[key]:value});
-            }
-        }
 
         const orders = await Order.find(search_query);
 

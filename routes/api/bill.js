@@ -3,19 +3,18 @@ var router = express.Router();
 var db = require('../../db_con/conn');
 var Bill = require('../../models/bill');
 
-router.get('/', async(req, res)=>{
+router.get('/:restaurant_id/:bill_id?', async(req, res)=>{
     try{
+        const restaurantId = req.params.restaurant_id;
+        const billId = req.params.bill_id;
+        const search_query={
+            restaurant_id: restaurantId
+        };
 
-        const search_query=[{
-            restaurant_id: req.body.restaurant_id
-        }];
-
-        for(const key in req.body){
-            if(key !== 'restaurant_id' && req.body.hasOwnProperty(key)){
-                const value = typeof req.body[key] === 'string' ? {$regex : new RegExp(req.body[key], 'key')}: req.body[key];
-                search_query.push({[key]:value});
-            }
+        if(req.params.bill_id){
+            bill_id: billId
         }
+
         const bills= await bill.find(search_query);
 
         res.json(bills);
