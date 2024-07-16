@@ -10,7 +10,13 @@ router.get('/', async(req, res)=>{
         var value = res.body.value;
 
         const search_query={};
-        search_query[variable_name]={$regex : new Regex(value, 'i')};
+        for(const [key, value] of Object.entries(body)){
+            if(key==='restaurant_id'){
+              search_query[key]=value;
+            }else{
+              search_query[key]={ $regex: new RegExp(value, 'i') };
+            }
+          }
 
         const bills= await bill.find(search_query);
 

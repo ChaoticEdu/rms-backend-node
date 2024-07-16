@@ -15,7 +15,13 @@ router.get('/',async(req, res)=>{
             return res.status(400).json({message: 'variable name and vlaue are required'});
         }
         const search_query={};
-        search_query[variable_name]={$regex: new RegExp(value, 'i')};
+        for(const [key, value] of Object.entries(body)){
+            if(key==='restaurant_id'){
+              search_query[key]=value;
+            }else{
+              search_query[key]={ $regex: new RegExp(value, 'i') };
+            }
+          }
 
         const users= await User.find(search_query);
 
