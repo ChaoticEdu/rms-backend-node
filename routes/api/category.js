@@ -1,5 +1,5 @@
 var express = require('express');
-var router =express.Router();
+var router = express.Router();
 var db = require('../../db_con/conn');
 var Category = require('../../models/category');
 
@@ -10,7 +10,7 @@ router.get('/',async(req, res)=>{
         }];
 
         for(const key in req.body){
-            if(key !== 'restaurant_id' && req.body.hasownproperty(key)){
+            if(key !== 'restaurant_id' && req.body.hasOwnProperty(key)){
 
                 const value = typeof req.body[key] === 'string' ? {$regex : new RegExp(req.body[key],'key')}:req.body[key];
                 search_query.push({[key]:value});
@@ -25,3 +25,5 @@ router.get('/',async(req, res)=>{
     }
 
 });
+
+module.exports = router;

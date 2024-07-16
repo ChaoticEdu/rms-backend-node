@@ -10,7 +10,7 @@ router.get('/', async(req , res)=>{
     }];
 
     for(const key in req.body){
-        if(key!== 'restaurant_id' && req.body.hasownproperty(key)){
+        if(key!== 'restaurant_id' && req.body.hasOwnProperty(key)){
             const value = typeof req.body[key] === 'sting' ? {$regex :new RegExp(req.body[key], 'i')}: req.body[key];
             search_query.push({[key]:value});
         }

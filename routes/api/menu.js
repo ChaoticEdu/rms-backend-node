@@ -11,7 +11,7 @@ router.get('/', async (req, res) => {
     }];
 
     for(const key in req.body){
-        if(key !== 'restaurant_id' && req.body.hasownproperty(key)){
+        if(key !== 'restaurant_id' && req.body.hasOwnProperty(key)){
             const value = typeof req.body[key] === 'string' ? {$regex : new Regex(req.body[key], 'key')}: req.body[key];
             search_query.push({[key]:value});
         }
