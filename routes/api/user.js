@@ -1,4 +1,6 @@
 var express = require('express');
+var mongoose = require('mongoose');
+// var ObjectId = require('mongoose').ObjectId;
 var router = express.Router();
 var db= require('../../db_con/conn');
 var User = require('../../models/user');
@@ -9,21 +11,19 @@ dotenv.config();
 
 router.get('/',async(req, res)=>{
     try{
-        const  variable_name = req.query.var_name;
-        const value = req.query.value;
-        if(!variable_name || !value){
-            return res.status(400).json({message: 'variable name and vlaue are required'});
-        }
-        const search_query={};
-        for(const [key, value] of Object.entries(body)){
-            if(key==='restaurant_id'){
-              search_query[key]=value;
-            }else{
-              search_query[key]={ $regex: new RegExp(value, 'i') };
-            }
-          }
+        const search_query = [{
+                restaurant_id: req.body.restaurant_id
+            }];
 
-        const users= await User.find(search_query);
+        for (const key in req.body) {
+            if (key !== 'restaurant_id' && req.body.hasOwnProperty(key)) {
+  
+            const value = typeof req.body[key] === 'string' ? { $regex: new RegExp(req.body[key], 'i') } : req.body[key];
+            search_query.push({[key]:value});
+            }
+        }
+
+        const users= await User.find({$and: search_query});
 
         res.json(users);
     }catch(err){

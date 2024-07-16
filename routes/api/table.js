@@ -5,20 +5,18 @@ var Table = require('../../models/table');
 
 router.get('/', async(req , res)=>{
     try{
-        const variable_name = req.query.var_name;
-        const value = req.query.value;
-    if(!variable_name || !value){
-        return res.status(400).json({message: 'variable name and value are required'});
-    }
-    const search_query = {};
-    for(const [key, value] of Object.entries(body)){
-        if(key==='restaurant_id'){
-          search_query[key]=value;
-        }else{
-          search_query[key]={ $regex: new RegExp(value, 'i') };
+    const search_query = [{
+        restaurant_id: req.body.restaurant_id
+    }];
+
+    for(const key in req.body){
+        if(key!== 'restaurant_id' && req.body.hasownproperty(key)){
+            const value = typeof req.body[key] === 'sting' ? {$regex :new RegExp(req.body[key], 'i')}: req.body[key];
+            search_query.push({[key]:value});
         }
-      }
-    const tables = await Table.find(search_query);
+    }
+
+    const tables = await Table.find({$and:search_query});
     res.json(tables);
     }catch(err){
         res.status(500).json({ message: err.message });

@@ -6,15 +6,18 @@ var verifytoken = require('../../auth/token');
 
 router.get('/', verifytoken,async (req, res) => {
     try {
-      const variable_name = req.query.var_name;
-      const value = req.query.value;
-      if (!variable_name || !value) {
-        return res.status(400).json({ message: 'Variable name and value are required' });
-      }
-      const search_query= {};
-      search_query[variable_name]={ $regex: new RegExp(value, 'i') };
+      const search_query=[{
+        resytaurant_id: req.body.resytaurant_id
+      }];
 
-      console.log('Query:', search_query);//debug console
+      for(const key in req.body){
+
+        if(key !== 'restuarant_id' && req.body.hasownproperty(key)){
+          const value = typeof req.body[key] === 'string' ? {$regex: new Regex(req.body[key], 'i')}: req.body[key];
+          search_query.push({[key]:value});
+        }
+
+      }
 
       const restaurants = await Restaurant.find(search_query);
 

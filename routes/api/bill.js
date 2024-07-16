@@ -6,18 +6,16 @@ var Bill = require('../../models/bill');
 router.get('/', async(req, res)=>{
     try{
 
-        var variable_name = res.body.variable_name;
-        var value = res.body.value;
+        const search_query=[{
+            restaurant_id: req.body.restaurant_id
+        }];
 
-        const search_query={};
-        for(const [key, value] of Object.entries(body)){
-            if(key==='restaurant_id'){
-              search_query[key]=value;
-            }else{
-              search_query[key]={ $regex: new RegExp(value, 'i') };
+        for(const key in req.body){
+            if(key !== 'restaurant_id' && req.body.hasownproperty(key)){
+                const value = typeof req.body[key] === 'string' ? {$regex : new Regex(req.body[key], 'key')}: req.body[key];
+                search_query.push({[key]:value});
             }
-          }
-
+        }
         const bills= await bill.find(search_query);
 
         res.json(bills);
