@@ -9,21 +9,17 @@ var bcrypt = require('bcryptjs');
 var dotenv = require('dotenv');
 dotenv.config();
 
-router.post('/',async(req, res)=>{
+router.get('/:restaurant_id/:name?',async(req, res)=>{
     try{
-        const search_query = [{
-                restaurant_id: req.body.restaurant_id
-            }];
 
-        for (const key in req.body) {
-            if (key !== 'restaurant_id' && req.body.hasOwnProperty(key)) {
-  
-            const value = typeof req.body[key] === 'string' ? { $regex: new RegExp(req.body[key], 'i') } : req.body[key];
-            search_query.push({[key]:value});
-            }
+        const restaurantId = req.params.restaurant_id;
+        let query = { restaurant_id: restaurantId };
+
+        if (req.query.name) {
+            query.user_name = req.query.name;
         }
-
-        const users= await User.find({$and: search_query});
+        console.log(query);
+        let users = await User.find(query);
 
         res.json(users);
     }catch(err){

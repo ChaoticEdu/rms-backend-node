@@ -13,7 +13,7 @@ router.get('/', verifytoken,async (req, res) => {
       for(const key in req.body){
 
         if(key !== 'restuarant_id' && req.body.hasOwnProperty(key)){
-          const value = typeof req.body[key] === 'string' ? {$regex: new Regex(req.body[key], 'i')}: req.body[key];
+          const value = typeof req.body[key] === 'string' ? {$regex: new RegExp(req.body[key], 'i')}: req.body[key];
           search_query.push({[key]:value});
         }
 
