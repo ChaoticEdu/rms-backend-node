@@ -9,7 +9,7 @@ var bcrypt = require('bcryptjs');
 var dotenv = require('dotenv');
 dotenv.config();
 
-router.get('/',async(req, res)=>{
+router.post('/',async(req, res)=>{
     try{
         const search_query = [{
                 restaurant_id: req.body.restaurant_id
