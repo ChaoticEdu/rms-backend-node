@@ -4,7 +4,7 @@ var db = require('../../db_con/conn');
 var Order = require('../../models/order');
 
 // Route to get orders based on a query parameter
-router.get('/:restaurant_id/:', async (req, res) => {
+router.get('/:restaurant_id', async (req, res) => {
     try {
         const restaurantId = req.params.restaurant_id;
         const search_query=[{
@@ -41,5 +41,7 @@ router.post('/upload', async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 });
+
+
 
 module.exports = router;
