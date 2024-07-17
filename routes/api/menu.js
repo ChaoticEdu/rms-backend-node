@@ -4,15 +4,19 @@ var db = require('../../db_con/conn');
 var Menu = require('../../models/menu_model');
 var Restaurant =require('../../models/restaurant_model');
 
-router.get('/:restaurant_id/:name?', async (req, res) => {
+router.get('/:restaurant_id/:category?', async (req, res) => {
     try {
         const restaurantId = req.params.restaurant_id;
-        const itemname = req.params.name;
+        const itemname = req.query.name;
+        const categorytype =req.params.category;
         const search_query={
             restaurant_id: restaurantId
         };
-        if(req.params.name){
+        if(req.query.name){
           search_query.item_name= itemname;
+        }
+        if(req.params.category){
+          search_query.item_category = categorytype;
         }
 
         console.log(search_query);
