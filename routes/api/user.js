@@ -120,4 +120,24 @@ router.post('/login', async (req, res)=> {
 
 });
 
+router.get('/delete/:restaurant_id/:id',async(req, res)=>{
+    try{
+
+        const restaurantid = req.params.restaurant_id;
+        const userid = req.params.id;
+
+        const query={
+            restaurant_id : restaurantid,
+            _id : userid
+        }
+
+        const deleteduser = await User.deleteOne(query);
+
+        res.status(201).json({message: 'user delete',deleteduser});
+
+    }catch(err){
+        res.status(500).json({message: err.meassage});
+    }
+});
+
 module.exports = router;

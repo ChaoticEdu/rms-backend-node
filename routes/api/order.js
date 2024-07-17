@@ -64,6 +64,32 @@ router.post('/upload', async (req, res) => {
     }
   });
 
+router.post('/update', async(req, res)=>{
 
+
+
+});
+
+router.get('/delete/:restaurant_id/:id',async(req, res)=>{
+    try{
+
+        const restaurantid = req.params.restaurant_id;
+        const orderid = req.params.id;
+
+        const query={
+            restaurant_id : restaurantid,
+            _id : orderid
+        }
+
+        const deletedorder = await User.deleteOne(query);
+
+        res.status(201).json({message: 'user delete',deletedorder});
+
+    }catch(err){
+        res.status(500).json({message: err.meassage});
+    }
+
+
+});
 
 module.exports = router;
