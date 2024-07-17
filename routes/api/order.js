@@ -37,15 +37,15 @@ router.post('/upload', async (req, res) => {
         restaurant_name: Joi.string().required()
       });
   
-      const { error } = orderS.validate(req.body.orders, { abortEarly: false });
+      // const { error } = orderS.validate(req.body.orders, { abortEarly: false });
   
-      if (error) {
-        const validationErrors = error.details.map(detail => ({
-          message: detail.message,
-          path: detail.path
-        }));
-        return res.status(400).json({ message: 'Validation errors:', errors: validationErrors });
-      }
+      // if (error) {
+      //   const validationErrors = error.details.map(detail => ({
+      //     message: detail.message,
+      //     path: detail.path
+      //   }));
+      //   return res.status(400).json({ message: 'Validation errors:', errors: validationErrors });
+      // }
   
       if (!req.body.orders || !Array.isArray(req.body.orders)) {
         return res.status(400).json({ message: 'Missing orders in request body' });
