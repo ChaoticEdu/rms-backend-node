@@ -8,9 +8,9 @@ const Joi = require('joi');
 router.get('/:restaurant_id', async (req, res) => {
     try {
         const restaurantId = req.params.restaurant_id;
-        const search_query=[{
-            restaurant_id: req.body.restaurant_id
-        }];
+        const search_query={
+            restaurant_id: restaurantId
+        };
 
 
         const orders = await Order.find(search_query);
@@ -21,7 +21,7 @@ router.get('/:restaurant_id', async (req, res) => {
     }
 });
 
-// Route to upload a new order
+
 router.post('/upload', async (req, res) => {
     try {
       const orderS = Joi.array().items({
@@ -88,8 +88,6 @@ router.get('/delete/:restaurant_id/:id',async(req, res)=>{
     }catch(err){
         res.status(500).json({message: err.meassage});
     }
-
-
 });
 
 module.exports = router;
