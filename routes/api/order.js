@@ -2,6 +2,8 @@ var express = require('express');
 var router = express.Router();
 var db = require('../../db_con/conn');
 var Order = require('../../models/order');
+var Bill = require('../../models/bill');
+const Joi = require('joi');
 
 router.get('/:restaurant_id', async (req, res) => {
     try {
@@ -22,24 +24,45 @@ router.get('/:restaurant_id', async (req, res) => {
 // Route to upload a new order
 router.post('/upload', async (req, res) => {
     try {
-        const neworder = new Order({
-            menu_id: req.body.menu_id,
-            user_id: req.body.user_id,
-            table_name: req.body.table_name,
-            item_name: req.body.item_name,
-            item_quantity: req.body.item_quantity,
-            order_date: req.body.order_date,
-            order_status: req.body.order_status,
-            bill_id: req.body.bill_id,
-            restaurant_id: req.body.restaurant_id,
-            restaurant_name: req.body.restaurant_name
-        });
-        const savedorder = await neworder.save();
-        res.json(savedorder);
+      const orderS = Joi.array().items({
+        menu_id: Joi.string().required(),
+        user_id: Joi.string().required(),
+        table_name: Joi.string().required(),
+        item_name: Joi.string().required(),
+        item_quantity: Joi.number().integer().min(1).required(),
+        order_date: Joi.date().iso().required(),
+        order_status: Joi.string().valid('Pending', 'Done').required(),
+        bill_id: Joi.string().allow(null).optional(),
+        restaurant_id: Joi.string().required(),
+        restaurant_name: Joi.string().required()
+      });
+  
+      const { error } = orderS.validate(req.body.orders, { abortEarly: false });
+  
+      if (error) {
+        const validationErrors = error.details.map(detail => ({
+          message: detail.message,
+          path: detail.path
+        }));
+        return res.status(400).json({ message: 'Validation errors:', errors: validationErrors });
+      }
+  
+      if (!req.body.orders || !Array.isArray(req.body.orders)) {
+        return res.status(400).json({ message: 'Missing orders in request body' });
+      }
+      const ordersToSave = req.body.orders.map(order => new Order(order));
+      const savedOrders = await Order.insertMany(ordersToSave);
+  
+      const response = {
+        message: 'Orders created successfully',
+        orders: savedOrders
+      };
+      res.json(response);
+  
     } catch (err) {
-        res.status(500).json({ message: err.message });
+      res.status(500).json({ message: err.message });
     }
-});
+  });
 
 
 
