@@ -29,18 +29,14 @@ router.post('/upload', async (req, res) => {
       restaurant_name: Joi.string().required()
     });
 
-    // if (!req.body.orders || !Array.isArray(req.body.orders)) {
-    //   return res.status(400).json({ message: 'Missing orders in request body' });
-    // }
-
-    // const { error } = orderSchema.validate(req.body.orders, { abortEarly: false });
-    // if (error) {
-    //   const validationErrors = error.details.map(detail => ({
-    //     message: detail.message,
-    //     path: detail.path
-    //   }));
-    //   return res.status(400).json({ message: 'Validation errors:', errors: validationErrors });
-    // }
+    const { error } = orderSchema.validate(req.body.orders, { abortEarly: false });
+    if (error) {
+      const validationErrors = error.details.map(detail => ({
+        message: detail.message,
+        path: detail.path
+      }));
+      return res.status(400).json({ message: 'Validation errors:', errors: validationErrors });
+    }
 
     const ordersToSave = req.body.orders.map(order => new Order(order));
     const savedOrders = await Order.insertMany(ordersToSave);
@@ -54,18 +50,35 @@ router.post('/upload', async (req, res) => {
     savedOrders.forEach(order => {
       console.log(`Emitting 'newOrder' to room ${order.restaurant_id}:`, order);
       req.io.to(order.restaurant_id.toString()).emit('newOrder', order);
-       console.log(`Emitting 'newOrder' to room ${order.restaurant_id}`);
     });
 
     res.json(response);
-
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
 router.post('/update', async (req, res) => {
-  // Update logic here
+  try {
+    if (!req.body.orders || !Array.isArray(req.body.orders)) {
+      return res.status(400).json({ message: 'Missing orders in request body' });
+    }
+
+    const ordersToUpdate = req.body.orders;
+    const updatedOrders = [];
+
+    for (const order of ordersToUpdate) {
+      const updatedOrder = await Order.findByIdAndUpdate(order._id, order, { new: true });
+      if (updatedOrder) {
+        updatedOrders.push(updatedOrder);
+        req.io.to(updatedOrder.restaurant_id.toString()).emit('orderUpdated', updatedOrder);
+      }
+    }
+
+    res.json({ message: 'Orders updated successfully', orders: updatedOrders });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 router.get('/delete/:restaurant_id/:id', async (req, res) => {

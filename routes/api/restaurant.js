@@ -6,9 +6,9 @@ var verifytoken = require('../../auth/token');
 
 router.get('/:restaurant_id', verifytoken,async (req, res) => {
     try {
-      const resturantId = req.params.resytaurant_id;
+      const restaurantId = req.params.restaurant_id;
       const search_query=[{
-        resytaurant_id: restaurantId
+        restaurant_id: restaurantId
       }];
 
 
