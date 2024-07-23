@@ -1,21 +1,21 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var apiroutes = require('./routes/api');
-var cors = require('cors');
-var dotenv = require('dotenv');
-
-var app = express();
-dotenv.config();
-
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const http = require('http');
+const socketIo = require('socket.io');
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
+const apiRouter = require('./routes/api');
+const cors = require('cors');
+const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 
-app.use(bodyParser.json());
+dotenv.config();
+
+const app = express();
+const server = http.createServer(app);
 
 // Configure CORS to allow requests from your Angular app
 const corsOptions = {
@@ -26,24 +26,26 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'pug');
-
-
-
+app.use(bodyParser.json());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'pug');
+
+// Middleware to add io to req object
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-
-app.use('/api', apiroutes);
-
+app.use('/api', apiRouter);
 app.use('/upload', express.static(path.join(__dirname, 'uploads')));
 
 // catch 404 and forward to error handler
@@ -60,6 +62,34 @@ app.use(function(err, req, res, next) {
   // render the error page
   res.status(err.status || 500);
   res.render('error');
+});
+
+// Socket.io configuration with CORS settings
+const io = socketIo(server, {
+  cors: {
+    origin: 'http://localhost:4200',
+    methods: ['GET', 'POST'],
+    credentials: true
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log('New client connected');
+
+  // Join room based on restaurantId sent from client
+  socket.on('joinRoom', (restaurantId) => {
+    socket.join(restaurantId);
+    console.log(`Client joined room: ${restaurantId}`);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Client disconnected');
+  });
+});
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
 
 module.exports = app;

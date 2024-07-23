@@ -1,93 +1,92 @@
-var express = require('express');
-var router = express.Router();
-var db = require('../../db_con/conn');
-var Order = require('../../models/order');
-var Bill = require('../../models/bill');
+const express = require('express');
+const router = express.Router();
 const Joi = require('joi');
+const Order = require('../../models/order');
 
 router.get('/:restaurant_id', async (req, res) => {
-    try {
-        const restaurantId = req.params.restaurant_id;
-        const search_query={
-            restaurant_id: restaurantId
-        };
-
-
-        const orders = await Order.find(search_query);
-
-        res.json(orders);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
+  try {
+    const restaurantId = req.params.restaurant_id;
+    const search_query = { restaurant_id: restaurantId };
+    const orders = await Order.find(search_query);
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
-
 
 router.post('/upload', async (req, res) => {
-    try {
-      const orderS = Joi.array().items({
-        menu_id: Joi.string().required(),
-        user_id: Joi.string().required(),
-        table_name: Joi.string().required(),
-        item_name: Joi.string().required(),
-        item_quantity: Joi.number().integer().min(1).required(),
-        order_date: Joi.date().iso().required(),
-        order_status: Joi.string().valid('Pending', 'Done').required(),
-        bill_id: Joi.string().allow(null).optional(),
-        restaurant_id: Joi.string().required(),
-        restaurant_name: Joi.string().required()
-      });
-  
-      // const { error } = orderS.validate(req.body.orders, { abortEarly: false });
-  
-      // if (error) {
-      //   const validationErrors = error.details.map(detail => ({
-      //     message: detail.message,
-      //     path: detail.path
-      //   }));
-      //   return res.status(400).json({ message: 'Validation errors:', errors: validationErrors });
-      // }
-  
-      if (!req.body.orders || !Array.isArray(req.body.orders)) {
-        return res.status(400).json({ message: 'Missing orders in request body' });
-      }
-      const ordersToSave = req.body.orders.map(order => new Order(order));
-      const savedOrders = await Order.insertMany(ordersToSave);
-  
-      const response = {
-        message: 'Orders created successfully',
-        orders: savedOrders
-      };
-      res.json(response);
-  
-    } catch (err) {
-      res.status(500).json({ message: err.message });
-    }
-  });
+  try {
+    const orderSchema = Joi.array().items({
+      menu_id: Joi.string().required(),
+      user_id: Joi.string().required(),
+      table_name: Joi.string().required(),
+      item_name: Joi.string().required(),
+      item_quantity: Joi.number().integer().min(1).required(),
+      order_date: Joi.date().iso().required(),
+      order_status: Joi.string().valid('Pending', 'Done').required(),
+      bill_id: Joi.string().allow(null).optional(),
+      restaurant_id: Joi.string().required(),
+      restaurant_name: Joi.string().required()
+    });
 
-router.post('/update', async(req, res)=>{
+    // if (!req.body.orders || !Array.isArray(req.body.orders)) {
+    //   return res.status(400).json({ message: 'Missing orders in request body' });
+    // }
 
+    // const { error } = orderSchema.validate(req.body.orders, { abortEarly: false });
+    // if (error) {
+    //   const validationErrors = error.details.map(detail => ({
+    //     message: detail.message,
+    //     path: detail.path
+    //   }));
+    //   return res.status(400).json({ message: 'Validation errors:', errors: validationErrors });
+    // }
 
+    const ordersToSave = req.body.orders.map(order => new Order(order));
+    const savedOrders = await Order.insertMany(ordersToSave);
 
+    const response = {
+      message: 'Orders created successfully',
+      orders: savedOrders
+    };
+
+    // Emit the new orders to the restaurant room
+    savedOrders.forEach(order => {
+      console.log(`Emitting 'newOrder' to room ${order.restaurant_id}:`, order);
+      req.io.to(order.restaurant_id.toString()).emit('newOrder', order);
+       console.log(`Emitting 'newOrder' to room ${order.restaurant_id}`);
+    });
+
+    res.json(response);
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
-router.get('/delete/:restaurant_id/:id',async(req, res)=>{
-    try{
+router.post('/update', async (req, res) => {
+  // Update logic here
+});
 
-        const restaurantid = req.params.restaurant_id;
-        const orderid = req.params.id;
+router.get('/delete/:restaurant_id/:id', async (req, res) => {
+  try {
+    const restaurantId = req.params.restaurant_id;
+    const orderId = req.params.id;
 
-        const query={
-            restaurant_id : restaurantid,
-            _id : orderid
-        }
+    const query = {
+      restaurant_id: restaurantId,
+      _id: orderId
+    };
 
-        const deletedorder = await User.deleteOne(query);
+    const deletedOrder = await Order.deleteOne(query);
 
-        res.status(201).json({message: 'user delete',deletedorder});
+    // Emit the deletion to the restaurant room
+    req.io.to(restaurantId).emit('orderDeleted', orderId);
 
-    }catch(err){
-        res.status(500).json({message: err.meassage});
-    }
+    res.status(201).json({ message: 'Order deleted', deletedOrder });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 module.exports = router;
