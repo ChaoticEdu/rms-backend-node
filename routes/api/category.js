@@ -25,4 +25,22 @@ router.get('/:restaurant_id/:category_id?',async(req, res)=>{
 
 });
 
+router.post('/update/', async()=>{
+    try{
+
+        const category = new Category({
+            name:req.body.name,
+            restaurant_id: req.body.restaurant_id,
+            restaurant_name: req.body.restaurant_name
+        });
+
+        const updatedcategory = await Category.updateOne(category);
+
+    }catch(err){
+        res.status(500).json({message: err.message});
+    }
+
+
+});
+
 module.exports = router;

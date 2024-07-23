@@ -65,7 +65,15 @@ router.post('/upload', async (req, res) => {
   });
 
 router.post('/update', async(req, res)=>{
+    try{
+        if (!req.body.orders || !Array.isArray(req.body.orders)) {
+            return res.status(400).json({ message: 'Missing orders in request body' });
+          }
+        const ordertoupdate = req.body.order
 
+    }catch(err){
+        res.status(500).json({message: err.message});
+    }
 
 
 });

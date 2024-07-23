@@ -4,6 +4,8 @@ var mongoose = require('mongoose');
 var router = express.Router();
 var db= require('../../db_con/conn');
 var User = require('../../models/user');
+var image = require('../../models/image');
+var upload = require('../../middleware/upload');
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcryptjs');
 var dotenv = require('dotenv');
@@ -120,6 +122,40 @@ router.post('/login', async (req, res)=> {
 
 });
 
+router.post('/update',upload.single('image'), async(req, res)=>{
+    try{
+        if(req.file){
+            const newimage= new image({
+                image_name: req.file.filename,
+                image_category: 'profile',
+                image_category_id: req.body.user_id,
+                image_category_type: 'User'
+            });
+            const savedimage = await newimage.save();
+        }
+
+        const imageId = await image.find(req.file.filename);
+        
+
+        const newuser = new User({
+            user_name: req.body.name,
+            email: req.body.email,
+            user_password: req.body.password,
+            user_phone_no: req.body.phone_no,
+            user_pic: imageId._id,
+            user_role: req.body.position,
+            pan_no: req.body.pan_no,
+            address: req.body.address,
+            restaurant_id: req.body.restaurant_id,
+            restaurant_name: req.body.restaurant_name
+        });
+
+
+    }catch(err){
+
+    }
+});
+
 router.get('/delete/:restaurant_id/:id',async(req, res)=>{
     try{
 
@@ -137,6 +173,45 @@ router.get('/delete/:restaurant_id/:id',async(req, res)=>{
 
     }catch(err){
         res.status(500).json({message: err.meassage});
+    }
+});
+
+
+router.post('/add-employee',upload.single('image'), async(req, res)=>{
+    try{
+
+        const newuser = new User({
+            user_name: req.body.name,
+            email: req.body.email,
+            user_password: req.body.password,
+            user_phone_no: req.body.phone_no,
+            user_pic: req.file.filename,
+            user_role: req.body.position,
+            pan_no: req.body.pan_no,
+            address: req.body.address,
+            restaurant_id: req.body.restaurant_id,
+            restaurant_name: req.body.restaurant_name
+        });
+        
+
+
+        const saveduser = await newuser.save();
+
+        if(req.file){
+            const newimage= new image({
+                image_name: req.file.filename,
+                image_category: 'profile',
+                image_category_id: saveduser._id,
+                image_category_type: 'User'
+            });
+            const savedimage = await newimage.save();
+        }
+        
+
+        res.status(200).json(saveduser);
+
+    }catch(err){
+        res.status(500).json({message: err.message});
     }
 });
 
