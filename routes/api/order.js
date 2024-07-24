@@ -77,27 +77,29 @@ router.get('/:restaurant_id/:table_name/', async (req, res) => {
   }
 });
 
-router.post('/statusupdate',async(req, res)=>{
-  try{
+router.post('/statusupdate', async (req, res) => {
+  try {
     const _id = req.body._id;
 
-    const updatedorder = {
-      restaurant_id : req.body.restaurant_id,
-      order_status : req.body.status
-    }
+    const updatedOrder = {
+      restaurant_id: req.body.restaurant_id,
+      order_status: req.body.status
+    };
 
-    console.log(updatedorder);
+    console.log(updatedOrder);
 
-    const orderupdated = await Order.findByIdAndUpdate(_id, updatedorder, {new: true});
+    const orderUpdated = await Order.findByIdAndUpdate(_id, updatedOrder, { new: true });
 
-    res.status(200).json(orderupdated);
+    console.log(`Emitting new status to room ${orderUpdated.restaurant_id}:`, orderUpdated);
+    req.io.to(orderUpdated.restaurant_id.toString()).emit('newStatus', orderUpdated);
 
-  }catch(err){
-    res.status(500).json({message: err.message});
+    res.status(200).json(orderUpdated);
+
+  } catch (err) {
+    console.error('Error updating order:', err);
+    res.status(500).json({ message: err.message });
   }
-
 });
-
 router.post('/update', async (req, res) => {
   try {
     if (!req.body.orders || !Array.isArray(req.body.orders)) {
