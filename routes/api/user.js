@@ -101,7 +101,6 @@ router.post('/registration', async(req, res) => {
 router.post('/login', async (req, res)=> {
 
     try{
-
         const logged = { 
             email: req.body.email,
             password: req.body.password
