@@ -58,6 +58,25 @@ router.post('/upload', async (req, res) => {
   }
 });
 
+
+
+router.get('/:restaurant_id/:table_name/', async (req, res) => {
+  try {
+    const { restaurant_id, table_name} = req.params;
+    
+    const search_query = {
+      restaurant_id,
+      table_name,
+      bill_id:null
+    };
+    const orders = await Order.find(search_query);
+    
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 router.post('/update', async (req, res) => {
   try {
     if (!req.body.orders || !Array.isArray(req.body.orders)) {
