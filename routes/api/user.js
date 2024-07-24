@@ -11,7 +11,7 @@ var bcrypt = require('bcryptjs');
 var dotenv = require('dotenv');
 dotenv.config();
 
-router.get('/:restaurant_id/:role?',async(req, res)=>{
+router.get('/:restaurant_id',async(req, res)=>{
     try{
 
         const restaurantId = req.params.restaurant_id;
@@ -36,6 +36,25 @@ router.get('/:restaurant_id/:role?',async(req, res)=>{
     }catch(err){
         res.status(500).json({message: err.message});
     }
+});
+
+
+
+router.get('/:restaurant_id/:user_id',async(req, res)=>{
+    try{
+
+        const restaurantId = req.params.restaurant_id;
+        const user_Id =req.params.user_id;
+        const  search_query = { restaurant_id: restaurantId , _id:user_Id };
+
+       
+
+        const users = await User.find(search_query);
+    
+        res.json(users);
+      } catch (err) {
+        res.status(500).json({ message: err.message });
+      }
 });
 
 router.post('/registration', async(req, res) => {
