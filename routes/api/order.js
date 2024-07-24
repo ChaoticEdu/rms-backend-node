@@ -77,6 +77,25 @@ router.get('/:restaurant_id/:table_name/', async (req, res) => {
   }
 });
 
+router.post('/statusupdate',async()=>{
+  try{
+    const { restaurant_id, order_id, status }= req.body;
+
+    const updatedorder = {
+      restaurant_id,
+      status
+    }
+
+    const orderupdated = await Order.findByIdAndUpdate(order_id, updatedorder, {new: true});
+
+    res.status(200).json(orderupdated);
+
+  }catch(err){
+    res.status(500).json({message: err.message});
+  }
+
+});
+
 router.post('/update', async (req, res) => {
   try {
     if (!req.body.orders || !Array.isArray(req.body.orders)) {
