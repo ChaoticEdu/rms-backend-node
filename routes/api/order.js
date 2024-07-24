@@ -29,14 +29,14 @@ router.post('/upload', async (req, res) => {
       restaurant_name: Joi.string().required()
     });
 
-    const { error } = orderSchema.validate(req.body.orders, { abortEarly: false });
-    if (error) {
-      const validationErrors = error.details.map(detail => ({
-        message: detail.message,
-        path: detail.path
-      }));
-      return res.status(400).json({ message: 'Validation errors:', errors: validationErrors });
-    }
+    // const { error } = orderSchema.validate(req.body.orders, { abortEarly: false });
+    // if (error) {
+    //   const validationErrors = error.details.map(detail => ({
+    //     message: detail.message,
+    //     path: detail.path
+    //   }));
+    //   return res.status(400).json({ message: 'Validation errors:', errors: validationErrors });
+    // }
 
     const ordersToSave = req.body.orders.map(order => new Order(order));
     const savedOrders = await Order.insertMany(ordersToSave);
