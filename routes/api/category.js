@@ -25,22 +25,44 @@ router.get('/:restaurant_id/:category_id?',async(req, res)=>{
 
 });
 
-router.post('/update/', async()=>{
+router.post('/update', async()=>{
     try{
+        const categoryid = req.body.restaurant_id;
+        const original = await Category.findById(categoryid);
 
-        const category = new Category({
-            name:req.body.name,
-            restaurant_id: req.body.restaurant_id,
-            restaurant_name: req.body.restaurant_name
-        });
+        const category = {
+            name:req.body.name || original.name,
+            restaurant_id: req.body.restaurant_id || original.restaurant_id,
+            restaurant_name: req.body.restaurant_name || original.restaurant_name
+        }
 
-        const updatedcategory = await Category.updateOne(category);
+        const updatedcategory = await Category.findByIdAndUpdate(categoryid, category, {new: true});
+
+        res.json(updatedcategory);
 
     }catch(err){
         res.status(500).json({message: err.message});
     }
+});
 
+router.get('/:restaurant_id/:category_id',async(req,res)=>{
+    try{
 
+        const restaurantid = req.params.restaurant_id;
+        const categoryid = req.params.category_id;
+
+        const search_query = {
+            restaurant_id: restaurantid,
+            _id: categoryid
+        }
+
+        const delcategory = await Category.deleteOne(search_query);
+
+        res.json(delcategory);
+
+    }catch(err){
+        res.status(500).json({message: err.message});
+    }
 });
 
 module.exports = router;

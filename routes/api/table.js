@@ -69,7 +69,7 @@ router.get('/:restaurant_id/:table_id',async(req,res)=>{
             _id: tableid
         }
 
-        const deltable = await Table.findOne(search_query);
+        const deltable = await Table.deleteOne(search_query);
 
         res.json(deltable);
     }catch(err){
