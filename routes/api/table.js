@@ -38,4 +38,43 @@ router.post('/upload',async(req , res)=>{
     }
 });
 
+router.post('/update', async(req, res)=>{
+    try{
+        const tableid =req.body.table_id;
+        const original = await Table.findById(tableid);
+
+        const updatetable = {
+            table_name : req.body.table_name || original.table_name,
+            table_status : req.body.table_status || original.table_status,
+            restaurant_id: req.body.restaurant_id || original.restaurant_id,
+            restaurant_name: req.body.restaurant_name || original.restaurant_name
+        }
+
+        const updatedtable = await Table.findByIdAndUpdate(tableid, updatetable, {new: true});
+
+        res.json(updatedtable);
+
+    }catch(err){
+        res.status(500).json({message: err.message});
+    }
+});
+
+router.get('/:restaurant_id/:table_id',async(req,res)=>{
+    try{
+        const restaurantid = req.params.restaurant_id;
+        const tableid =req.params.table_id;
+
+        const search_query= {
+            restaurant_id: restaurantid,
+            _id: tableid
+        }
+
+        const deltable = await Table.findOne(search_query);
+
+        res.json(deltable);
+    }catch(err){
+        res.status(500).json({message: err.message});
+    }
+});
+
 module.exports = router;

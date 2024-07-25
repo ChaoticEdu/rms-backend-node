@@ -4,32 +4,48 @@ var db = require('../../db_con/conn');
 var Menu = require('../../models/menu_model');
 var Restaurant =require('../../models/restaurant_model');
 
-router.get('/:restaurant_id/:category?', async (req, res) => {
-    try {
-        const restaurantId = req.params.restaurant_id;
-        const itemname = req.query.name;
-        const categorytype =req.params.category;
-        const search_query={
-            restaurant_id: restaurantId
-        };
-        if(req.query.name){
-          search_query.item_name= itemname;
-        }
-        if(req.params.category){
-          search_query.item_category = categorytype;
-        }
+router.get('/:restaurant_id', async (req, res) => {
+  try {
+    const restaurantId = req.params.restaurant_id;
 
-        console.log(search_query);
+    const search_query = {
+      restaurant_id: restaurantId,
+    };
 
-        let menu_item = await Menu.find(search_query);
+    console.log(search_query);
 
-        console.log('Results:', menu_item);
+    let menu_item = await Menu.find(search_query); // Use findOne to get a single item
 
-        res.json(menu_item);
-    } catch (err) {
-      res.status(500).json({ message: err.message });
-    }
-  });
+    console.log('Result:', menu_item);
+
+    res.json(menu_item); // Send the single menu item object, not an array
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.get('/:restaurant_id/:menu_id', async (req, res) => {
+  try {
+    const restaurantId = req.params.restaurant_id;
+    const menuid = req.params.menu_id;
+    const search_query = {
+      restaurant_id: restaurantId,
+      _id : menuid
+    };
+
+
+    console.log(search_query);
+
+    let menu_item = await Menu.findOne(search_query); // Use findOne to get a single item
+
+    console.log('Result:', menu_item);
+
+    res.json(menu_item); // Send the single menu item object, not an array
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 
 router.post('/upload', async(req, res)=>{
   try{
