@@ -10,7 +10,7 @@ router.get('/:restaurant_id/:category_id?',async(req, res)=>{
         let search_query={ restaurant_id : restaurantId };
 
         if(req.params.category_id){
-            search_query.category_id = categoryId;
+            search_query._id = categoryId;
             }
         console.log(search_query);
 
