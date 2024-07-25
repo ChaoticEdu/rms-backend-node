@@ -71,4 +71,23 @@ router.post('/upload', async(req, res)=>{
   }
 });
 
+router.get('/delete/:restuarant_id/:menu_id?',async(req, res)=>{
+  try{
+    const restaurantid = req.body.restaurant_id;
+    const menuid = req.body.menu_id;
+
+    const search_query= {
+      restaurant_id: restaurantid,
+      _id: menuid
+    }
+
+    const deletedmenu = await Menu.deleteOne(search_query);
+
+    res.json(deletedmenu);
+
+  }catch(err){
+    res.status(500).json({message: err.message});
+  }
+});
+
 module.exports = router;
