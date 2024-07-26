@@ -24,13 +24,14 @@ router.get('/:restaurant_id/:table_name?', async(req , res)=>{
 });
 
 router.post('/upload',async(req , res)=>{
+
+  
     try{
-        const newtable = new Table({
-            table_name: req.body.table_name,
-            table_status: req.body.table_status,
-            restaurant_id: req.body.restaurant_id,
-            restaurant_name: req.body.restaurant_name
-        })
+        
+
+        const { table_name, restaurant_id, restaurant_name, table_status } = req.body;
+
+        
 
         const existingTable = await Table.findOne({ table_name, restaurant_id });
 
@@ -38,6 +39,13 @@ router.post('/upload',async(req , res)=>{
             // If the category exists, send an error message
             return res.status(400).json({ message: 'Category already exists for this restaurant.' });
         }
+        const newtable = new Table({
+            table_name,
+            restaurant_id,
+            restaurant_name,
+            table_status
+        });
+
     const savedtable = await newtable.save();
     res.status(201).json(savedtable);
     }catch(err){
@@ -83,5 +91,36 @@ router.get('/:restaurant_id/:table_id',async(req,res)=>{
         res.status(500).json({message: err.message});
     }
 });
+
+router.get('/delete/:restaurant_id/:table_id', async (req, res) => { 
+     // Changed to DELETE method
+   
+    try {
+        const restaurantid = req.params.restaurant_id;
+        const tableid = req.params.table_id;
+        console.log(restaurantid,tableid)
+
+        // Construct the query object
+        const search_query = {
+            restaurant_id: restaurantid,
+            _id: tableid
+        };
+
+        // Delete the document from the Table collection
+        const deltable = await Table.deleteOne(search_query);
+
+        if (deltable.deletedCount === 0) {
+            // No document was deleted, meaning no matching document was found
+            return res.status(404).json({ message: 'Table not found.' });
+        }
+
+        // Successfully deleted
+        res.json({ message: 'Table deleted successfully.', result: deltable });
+    } catch (err) {
+        // Handle any errors that occurred during the process
+        res.status(500).json({ message: err.message });
+    }
+});
+
 
 module.exports = router;
