@@ -50,6 +50,7 @@ router.post('/upload', async (req, res) => {
     savedOrders.forEach(order => {
       console.log(`Emitting 'newOrder' to room ${order.restaurant_id}:`, order);
       req.io.to(order.restaurant_id.toString()).emit('newOrder', order);
+      console.log(order._id);
     });
 
     res.json(response);
@@ -79,19 +80,38 @@ router.get('/:restaurant_id/:table_name/', async (req, res) => {
 
 router.post('/statusupdate', async (req, res) => {
   try {
-    const _id = req.body._id;
+    const { _id, restaurant_id, status } = req.body;
+
+    if (!_id) {
+      return res.status(400).json({ message: 'Order ID is required' });
+    }
 
     const updatedOrder = {
-      restaurant_id: req.body.restaurant_id,
-      order_status: req.body.status
+      restaurant_id,
+      order_status: status
     };
 
-    console.log(updatedOrder);
+    console.log('Updating order with:', updatedOrder);
 
+    // Find and update the order
     const orderUpdated = await Order.findByIdAndUpdate(_id, updatedOrder, { new: true });
 
-    console.log(`Emitting new status to room ${orderUpdated.restaurant_id}:`, orderUpdated);
-    req.io.to(orderUpdated.restaurant_id.toString()).emit('newStatus', orderUpdated);
+    console.log(orderUpdated.restaurant_id.toString());
+
+    if (!orderUpdated) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    console.log('Order updated:', orderUpdated);
+
+    // Emit the updated status to the specified room
+    if (orderUpdated.restaurant_id) {
+      req.io.to(orderUpdated.restaurant_id.toString()).emit('newStatus', orderUpdated);
+      const ii = orderUpdated._id.toString();
+      console.log(ii);
+    } else {
+      console.error('restaurant_id is not present in the updated order');
+    }
 
     res.status(200).json(orderUpdated);
 
@@ -100,6 +120,8 @@ router.post('/statusupdate', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+
 router.post('/update', async (req, res) => {
   try {
     if (!req.body.orders || !Array.isArray(req.body.orders)) {
