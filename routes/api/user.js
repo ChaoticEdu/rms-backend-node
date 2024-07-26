@@ -152,17 +152,9 @@ router.post('/update',upload.single('image'), async(req, res)=>{
         const userid = req.body.user_id;
         const originaluser = await User.findById(userid);
 
-        if(req.file){
-            const newimage= new image({
-                image_name: req.file.filename,
-                image_category: 'profile',
-                image_category_id: saveduser._id,
-                image_category_type: 'User'
-            });
-            const savedimage = await newimage.save();
-        }
 
-        const updateuser = new User({
+
+        const updateuser = {
             user_name: req.body.name || originaluser.user_name,
             email: req.body.email || originaluser.email,
             user_phone_no: req.body.phone_no || originaluser.user_phone_no,
@@ -172,10 +164,23 @@ router.post('/update',upload.single('image'), async(req, res)=>{
             address: req.body.address || originaluser.address,
             restaurant_id: req.body.restaurant_id || originaluser.restaurant_id,
             restaurant_name: req.body.restaurant_name || originaluser.restaurant_name
-        });
+        };
+
+        console.log("console before saving : ",updateuser);
+
         const saveduser = await User.findByIdAndUpdate(userid, updateuser, {new:true});
 
-        res.status(200).json(saveduser);
+        if(req.file){
+            const newimage= new image({
+                image_name: req.file.filename,
+                image_category: 'profile',
+                image_category_id: userid,
+                image_category_type: 'User'
+            });
+            const savedimage = await newimage.save();
+        }
+
+        res.status(200).json({message:"here is the updateUser"+saveduser});
 
     }catch(err){
         res.status(500).json({message: err.message});
@@ -239,6 +244,25 @@ router.post('/add-employee',upload.single('image'), async(req, res)=>{
     }catch(err){
         res.status(500).json({message: err.message});
     }
+});
+
+router.get('/delete/:restaurant_id/:user_id',async(req,res)=>{
+    try{
+
+        const restaurantid = req.params.restaurant_id;
+        const userid = req.params.user_id;
+
+        if(!restaurantid || !userid){
+                return res.json("user id or restaurant id missing");
+        }
+
+        const deluser = await User.findByIdAndDelete(userid);
+
+        res.status(200).json(deluser);
+    }catch(err){
+        res.status(500).json({meassage: err.meassage});
+    }
+
 });
 
 module.exports = router;

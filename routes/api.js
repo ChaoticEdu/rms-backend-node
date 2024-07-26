@@ -8,6 +8,7 @@ var orderroute = require('./api/order')
 var billroute = require('./api/bill');
 var categoryroute = require('./api/category');
 var imageroute = require('./api/image');
+var inventoryroute = require('./api/inventory');
 
 router.use('/restaurant',restaurantroute);
 router.use('/menu',menuroute);
@@ -17,5 +18,6 @@ router.use('/order',orderroute);
 router.use('/bill',billroute);
 router.use('/category',categoryroute);
 router.use('/image', imageroute);
+router.use('/inventory',inventoryroute);
 
 module.exports = router;
