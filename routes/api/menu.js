@@ -89,7 +89,18 @@ router.post('/upload', async(req, res)=>{
       restaurant_id: req.body.restaurant_id,
       restaurant_name: req.body.restaurant_name
     });
+
+    const existingCategory = await Category.findOne({ item_name, restaurant_id });
+
+    if (existingCategory) {
+        // If the category exists, send an error message
+        return res.status(400).json({ message: 'Category already exists for this restaurant.' });
+    }
+
+
     console.log('menu :',newmenu);
+
+
 
     const savedtable = await newmenu.save();
 
