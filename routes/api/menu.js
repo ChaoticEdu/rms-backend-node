@@ -47,6 +47,36 @@ router.get('/:restaurant_id/:menu_id', async (req, res) => {
 });
 
 
+router.get('/menubycat/:restaurant_id/:cat_id', async (req, res) => {
+  try {
+    const restaurantId = req.params.restaurant_id;
+    const cat_id = req.params.cat_id;
+    const search_query = {
+      restaurant_id: restaurantId,
+      item_category : cat_id
+    };
+
+
+    console.log(search_query);
+    console.log("hello")
+
+    let menu_item = await Menu.find(search_query); // Use findOne to get a single item
+
+    console.log('Result:', menu_item);
+
+    res.json(menu_item); // Send the single menu item object, not an array
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
+
+
+
+
+
+
 router.post('/upload', async(req, res)=>{
   try{
 
