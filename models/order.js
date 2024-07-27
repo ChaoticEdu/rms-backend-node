@@ -7,6 +7,8 @@ const orderschema = new Schema({
     table_name:{type: String,required: true},
     item_name : {type : String,required: true},
     item_quantity : { type : Number, required: true, min:1},
+    item_price:{type: Number},
+    total_amount:{type: Number},
     order_date: {type : Date,required: true},
     order_status : {type : String, required: true ,enum:['Pending','AcceptOrder','Done','Cancle','Served','Waiting']},
     bill_id: {type : mongoose.Schema.Types.ObjectId, ref:'bill', allowNull: true},
