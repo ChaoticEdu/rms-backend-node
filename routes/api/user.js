@@ -50,7 +50,8 @@ router.get('/:restaurant_id/:user_id',async(req, res)=>{
        
 
         const users = await User.find(search_query);
-    
+        
+
         res.json(users);
       } catch (err) {
         res.status(500).json({ message: err.message });
@@ -59,14 +60,16 @@ router.get('/:restaurant_id/:user_id',async(req, res)=>{
 
 router.post('/registration', async(req, res) => {
     try{
+
+
         const newuser = new User({
             user_name: req.body.name,
             email: req.body.email,
             user_password: req.body.password,
-            user_phone_no: req.body.phone_no,
-            user_pic: req.body.pic,
+            user_phone_no: req.body.phoneNumber,
+            user_pic: req.body.image || "default.jpg",
             user_role: req.body.position,
-            pan_no: req.body.pan_no,
+            pan_no: req.body.panNumber,
             address: req.body.address,
             restaurant_id: req.body.restaurant_id,
             restaurant_name: req.body.restaurant_name
@@ -157,10 +160,10 @@ router.post('/update',upload.single('image'), async(req, res)=>{
         const updateuser = {
             user_name: req.body.name || originaluser.user_name,
             email: req.body.email || originaluser.email,
-            user_phone_no: req.body.phone_no || originaluser.user_phone_no,
+            user_phone_no: req.body.phoneNumber || originaluser.user_phone_no,
             user_pic: req.file.filename || originaluser.user_pic,
             user_role: req.body.position || originaluser.user_role,
-            pan_no: req.body.pan_no || originaluser.pan_no,
+            pan_no: req.body.panNumber || originaluser.pan_no,
             address: req.body.address || originaluser.address,
             restaurant_id: req.body.restaurant_id || originaluser.restaurant_id,
             restaurant_name: req.body.restaurant_name || originaluser.restaurant_name
@@ -187,38 +190,50 @@ router.post('/update',upload.single('image'), async(req, res)=>{
     }
 });
 
-router.get('/delete/:restaurant_id/:id',async(req, res)=>{
-    try{
+// router.get('/delete/:restaurant_id/:id',async(req, res)=>{
+//     try{
 
-        const restaurantid = req.params.restaurant_id;
-        const userid = req.params.id;
+//         const restaurantid = req.params.restaurant_id;
+//         const userid = req.params.id;
 
-        const query={
-            restaurant_id : restaurantid,
-            _id : userid
-        }
+//         const query={
+//             restaurant_id : restaurantid,
+//             _id : userid
+//         }
 
-        const deleteduser = await User.deleteOne(query);
+//         const deleteduser = await User.deleteOne(query);
 
-        res.status(201).json({message: 'user delete',deleteduser});
+//         res.status(201).json({message: 'user delete',deleteduser});
 
-    }catch(err){
-        res.status(500).json({message: err.meassage});
-    }
-});
+//     }catch(err){
+//         res.status(500).json({message: err.meassage});
+//     }
+// });
 
 
 router.post('/add-employee',upload.single('image'), async(req, res)=>{
     try{
+        const email=req.body.email;
+        const restaurant_id=req.body.restaurant_id;
+        let Images= "default.jpg";
+        if(req.file){
+            Images = req.file.filename;
+        }
+
+        const existingTable = await User.findOne({email,restaurant_id});
+
+        if (existingTable) {
+            return res.status(400).json({ message: 'User already exists for this restaurant.' });
+        }
 
         const newuser = new User({
             user_name: req.body.name,
             email: req.body.email,
             user_password: req.body.password,
-            user_phone_no: req.body.phone_no,
-            user_pic: req.file.filename,
+            user_phone_no: req.body.phoneNumber,
+            user_pic: Images,
             user_role: req.body.position,
-            pan_no: req.body.pan_no,
+            pan_no: req.body.panNumber,
             address: req.body.address,
             restaurant_id: req.body.restaurant_id,
             restaurant_name: req.body.restaurant_name
