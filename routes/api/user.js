@@ -212,9 +212,12 @@ router.post('/update',upload.single('image'), async(req, res)=>{
 
 
 router.post('/add-employee',upload.single('image'), async(req, res)=>{
+    console.log("hello")
+    console.log(req.body);
     try{
         const email=req.body.email;
         const restaurant_id=req.body.restaurant_id;
+        console.log(req.body);
         let Images= "default.jpg";
         if(req.file){
             Images = req.file.filename;
@@ -239,6 +242,7 @@ router.post('/add-employee',upload.single('image'), async(req, res)=>{
             restaurant_name: req.body.restaurant_name
         });
         
+
 
 
         const saveduser = await newuser.save();

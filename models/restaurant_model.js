@@ -15,7 +15,7 @@ const restaurantSchema = new Schema({
     longitude: { type: Number }
   },
   phone: { type: String },
-  email: { type: String },
+  email: { type: String,required: true  },
   createdAt: { type: Date },
 }, { collection: 'restaurant' });
 

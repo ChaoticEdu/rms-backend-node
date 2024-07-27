@@ -23,30 +23,46 @@ router.get('/:restaurant_id', verifytoken,async (req, res) => {
     }
   });
 
-router.post('/upload', async(req,res)=>{
-    try{
-      const newrestaurants = new Restaurant({
-        name: req.body.name,
+  router.post('/upload', async (req, res) => {
+    try {
+      console.log("Received request:", req.body);
+  
+      const { email, name, location, coordinates, phone, createdAt } = req.body;
+  
+      // Check for existing restaurant with the same email
+      const existing = await Restaurant.findOne({ email });
+  
+      if (existing) {
+        return res.status(400).json({ message: 'Registration failed: email already exists' });
+      }
+  
+      // Create new restaurant record
+      const newRestaurant = new Restaurant({
+        name,
         location: {
-          address: req.body.location.address,
-          city: req.body.location.city,
-          state: req.body.location.state,
-          zip: req.body.location.zip
+          address: location.address,
+          city: location.city,
+          state: location.state,
+          zip: location.zip
         },
         coordinates: {
-          latitude: req.body.location.coordinates.latitude,
-          longitude: req.body.location.coordinates.longitude
+          latitude: coordinates.latitude ?? null,
+          longitude: coordinates.longitude?? null,
         },
-        phone: req.body.phone,
-        email: req.body.email,
-        createdAt: req.body.createdAt || Date.now()
+        phone,
+        email,
+        createdAt: createdAt || Date.now()
       });
-      const savedrestaurant = await newrestaurants.save();
-      res.status(201).json(savedrestaurant);
-    }catch(err){
-      res.status(500).json({message:err.message});
+  
+      // Save to database
+      const savedRestaurant = await newRestaurant.save();
+      res.status(201).json(savedRestaurant);
+    } catch (err) {
+      console.error("Error:", err);
+      res.status(500).json({ message: err.message });
     }
   });
+  
 
 module.exports = router;
 
