@@ -5,6 +5,7 @@ var Bill = require('../../models/bill');
 var Menu = require('../../models/menu_model');
 var Order =require('../../models/order');
 var json2pdf = require('../../middleware/j2p');
+const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 
 router.get('/:restaurant_id/:bill_id?', async (req, res) => {
     try {
@@ -67,14 +68,19 @@ router.post('/upload', async(req, res)=>{
         let iteml= orders.map(order => order.item_name);
 
         console.log(iteml);
+
+        console.log(`Channel: ${req.body.channel}`);
         
+        const billstatus = req.body.channel === "cash" ? "done":"processing"; 
+
+        console.log(`Bill Status: ${billstatus}`);
 
         const newbill = new Bill({
             item_list: iteml,
             total: req.body.total,
             discount: req.body.dis,
             bill_channel: req.body.channel,
-            bill_status: 'processing',
+            bill_status: billstatus,
             restaurant_id: req.body.restaurant_id,
             restaurant_name: req.body.restaurant_name
         });
@@ -92,7 +98,7 @@ router.post('/upload', async(req, res)=>{
 
         console.log(updatedOrders);
 
-        res.status(200).json(updatedOrders);
+        res.status(200).json(newbill);
         
     }catch(err){
         res.status(500).json({message: res.message});
@@ -155,33 +161,111 @@ router.post('/update', async(req, res)=>{
     }
 });
 
-// router.post('/pdf', async (req, res) => {
-//     try {
-//         const jsondata = req.body;
-//         const fileconverted = await json2pdf(jsondata);
 
-//         res.setHeader('Content-Type', 'application/pdf');
-//         res.setHeader('Content-Disposition', 'attachment; filename=generated.pdf');
-//         res.send(fileconverted);
-//     } catch (err) {
-//         res.status(500).json({ message: err.message });
-//     }
-// });
 
 router.post('/pdf', async (req, res) => {
     try {
-        const jsondata = req.body;
-        const pdfBlob = await json2pdf(jsondata);
+        // Fetch the bill by its ID
+        const bill = await Bill.findById(req.body.billId);
+        if (!bill) {
+            return res.status(404).send('Bill not found');
+        }
 
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'attachment; filename=generated.pdf');
-        
-        const buffer = await pdfBlob.arrayBuffer();
-        res.send(Buffer.from(buffer));
+        // Fetch the menu items by their names in item_list
+        const menuItems = await Menu.find({
+            item_name: { $in: bill.item_list }
+        }).select('item_name item_price');
+
+        // Map the menu items to a format suitable for display
+        const itemDetails = menuItems.map(item => ({
+            name: item.item_name,
+            price: item.item_price
+        }));
+
+        // Create the PDF document
+        const pdfDoc = await PDFDocument.create();
+        const page = pdfDoc.addPage();
+        const { width, height } = page.getSize();
+        const fontSize = 12;
+        const margin = 50;
+
+        // Embed the font
+        const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+        // Helper function to calculate text width
+        const getTextWidth = (text) => font.widthOfTextAtSize(text, fontSize);
+
+        // Determine the maximum width of labels
+        const labels = [
+            'Bill ID:', 'Restaurant Name:', 'Table Name:', 
+            'Total:', 'Discount:', 'Channel:', 'Status:'
+        ];
+        const maxLabelWidth = Math.max(...labels.map(label => getTextWidth(label)));
+
+        // Function to draw label and value with aligned values
+        const drawLabelValue = (label, value, y, spacing) => {
+            const labelWidth = getTextWidth(label);
+            page.drawText(label, {
+                x: margin,
+                y: y,
+                size: fontSize,
+                font: font,
+                color: rgb(0, 0, 0),
+            });
+            page.drawText(value, {
+                x: width - margin - getTextWidth(value) - spacing, // Align value to the right
+                y: y,
+                size: fontSize,
+                font: font,
+                color: rgb(0, 0, 0),
+            });
+        };
+
+        // Add bill information to the PDF
+        drawLabelValue('Bill ID:', `${bill._id}`, height - 50, margin + maxLabelWidth);
+        drawLabelValue('Restaurant Name:', bill.restaurant_name, height - 70, margin + maxLabelWidth);
+        drawLabelValue('Table Name:', req.body.table_name, height - 90, margin + maxLabelWidth);
+
+        // Add items to the PDF
+        page.drawText(`Items:`, {
+            x: margin,
+            y: height - 110,
+            size: fontSize,
+            font: font,
+            color: rgb(0, 0, 0),
+        });
+
+        itemDetails.forEach((item, index) => {
+            page.drawText(`${index + 1}. ${item.name} - $${item.price.toFixed(2)}`, {
+                x: margin,
+                y: height - 130 - (index * 20),
+                size: fontSize,
+                font: font,
+                color: rgb(0, 0, 0),
+            });
+        });
+
+        // Add total, discount, and other details
+        drawLabelValue('Total:', `$${bill.total.toFixed(2)}`, height - 150 - (itemDetails.length * 20), margin + maxLabelWidth);
+        drawLabelValue('Discount:', bill.discount ? `$${bill.discount.toFixed(2)}` : 'None', height - 170 - (itemDetails.length * 20), margin + maxLabelWidth);
+        drawLabelValue('Channel:', bill.bill_channel, height - 190 - (itemDetails.length * 20), margin + maxLabelWidth);
+        drawLabelValue('Status:', bill.bill_status, height - 210 - (itemDetails.length * 20), margin + maxLabelWidth);
+
+        // Save the PDF and send it to the client
+        const pdfBytes = await pdfDoc.save();
+
+        res.set({
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': 'attachment; filename=bill.pdf',
+        });
+
+        res.status(200).send(Buffer.from(pdfBytes));
+
     } catch (err) {
-        console.error('Error generating PDF:', err);
-        res.status(500).json({ message: err.message });
+        console.error(err);
+        res.status(500).json({ message: 'An error occurred while processing the request.' });
     }
 });
+
 
 module.exports = router;

@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-router.get('/',async(req, res)=>{
+router.post('/',async(req, res)=>{
     const {amount , currency , orderId , userId} = req.body;
     try{
 
