@@ -131,11 +131,11 @@ router.post('/update', async(req, res)=>{
         const newbill = new Bill({
             item_list: iteml,
             total: req.body.total,
-            discount: req.body.dis,
+            discount: req.body.dis || 0,
             bill_channel: req.body.channel,
             bill_status: 'processing',
             restaurant_id: req.body.restaurant_id,
-            restaurant_name: req.body.restaurant_name
+            restaurant_name: req.body.restaurant_name || 'cafe'
         });
         console.log(newbill);
 
@@ -167,6 +167,9 @@ router.post('/pdf', async (req, res) => {
     try {
         // Fetch the bill by its ID
         const bill = await Bill.findById(req.body.billId);
+
+        console.log("bill   : ",bill);
+
         if (!bill) {
             return res.status(404).send('Bill not found');
         }
@@ -176,11 +179,15 @@ router.post('/pdf', async (req, res) => {
             item_name: { $in: bill.item_list }
         }).select('item_name item_price');
 
+        console.log("menu items   :  ",menuItems);
+
         // Map the menu items to a format suitable for display
         const itemDetails = menuItems.map(item => ({
             name: item.item_name,
             price: item.item_price
         }));
+
+        console.log(" item tails  : ",itemDetails);
 
         // Create the PDF document
         const pdfDoc = await PDFDocument.create();
@@ -223,7 +230,7 @@ router.post('/pdf', async (req, res) => {
 
         // Add bill information to the PDF
         drawLabelValue('Bill ID:', `${bill._id}`, height - 50, margin + maxLabelWidth);
-        drawLabelValue('Restaurant Name:', bill.restaurant_name, height - 70, margin + maxLabelWidth);
+        drawLabelValue('Restaurant Name:', bill.restaurant_name || "CAFE", height - 70, margin + maxLabelWidth);
         drawLabelValue('Table Name:', req.body.table_name, height - 90, margin + maxLabelWidth);
 
         // Add items to the PDF
