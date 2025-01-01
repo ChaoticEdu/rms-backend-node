@@ -1,6 +1,6 @@
-# Retail Management System (RMS) Backend
+# Restaurant Management System (RMS) Backend
 
-This project is the backend for the Retail Management System (RMS), built using Node.js and Express. It manages multiple restaurants, handling various operations such as restaurant details, locations, and contact information. The backend connects to a MongoDB database for data storage and provides a robust API for interaction.
+This project is the backend for the Restaurant Management System (RMS), built using Node.js and Express. It manages multiple restaurants, handling various operations such as restaurant details, locations, and contact information. The backend connects to a MongoDB database for data storage and provides a robust API for interaction.
 
 ## Features
 
